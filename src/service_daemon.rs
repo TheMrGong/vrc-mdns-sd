@@ -1201,6 +1201,15 @@ impl Zeroconf {
             )),
             0,
         );
+        out.add_additional_answer(
+            Box::new(DnsPointer::new(
+                info.get_type(),
+                TYPE_PTR,
+                CLASS_IN,
+                info.get_other_ttl(),
+                info.get_fullname().to_string(),
+            ))
+        );
 
         if let Some(sub) = info.get_subtype() {
             debug!("Adding subdomain {}", sub);
@@ -1227,6 +1236,18 @@ impl Zeroconf {
                 info.get_hostname().to_string(),
             )),
             0,
+        );
+        
+        out.add_additional_answer(
+            Box::new(DnsSrv::new(
+                info.get_fullname(),
+                CLASS_IN | CLASS_UNIQUE,
+                info.get_host_ttl(),
+                info.get_priority(),
+                info.get_weight(),
+                info.get_port(),
+                info.get_hostname().to_string(),
+            ))
         );
         out.add_answer_at_time(
             Box::new(DnsTxt::new(
@@ -1258,6 +1279,15 @@ impl Zeroconf {
                     addr,
                 )),
                 0,
+            );
+            out.add_additional_answer(
+                Box::new(DnsAddress::new(
+                    info.get_hostname(),
+                    TYPE_A,
+                    CLASS_IN | CLASS_UNIQUE,
+                    info.get_host_ttl(),
+                    addr,
+                ))
             );
         }
 
@@ -1721,6 +1751,26 @@ impl Zeroconf {
                                         CLASS_IN | CLASS_UNIQUE,
                                         service.get_host_ttl(),
                                         address,
+                                    )),
+                                );
+                                out.add_additional_answer(
+                                    Box::new(DnsAddress::new(
+                                        service.get_fullname(),
+                                        TYPE_A,
+                                        CLASS_IN | CLASS_UNIQUE,
+                                        service.get_host_ttl(),
+                                        address,
+                                    )),
+                                );
+                                out.add_additional_answer(
+                                    Box::new(DnsSrv::new(
+                                        service.get_fullname(),
+                                        CLASS_IN | CLASS_UNIQUE,
+                                        service.get_host_ttl(),
+                                        service.get_priority(),
+                                        service.get_weight(),
+                                        service.get_port(),
+                                        service.get_hostname().to_string(),
                                     )),
                                 );
                             }
