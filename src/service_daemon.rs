@@ -1201,15 +1201,6 @@ impl Zeroconf {
             )),
             0,
         );
-        out.add_additional_answer(
-            Box::new(DnsPointer::new(
-                info.get_type(),
-                TYPE_PTR,
-                CLASS_IN,
-                info.get_other_ttl(),
-                info.get_fullname().to_string(),
-            ))
-        );
 
         if let Some(sub) = info.get_subtype() {
             debug!("Adding subdomain {}", sub);
@@ -1225,19 +1216,7 @@ impl Zeroconf {
             );
         }
 
-        out.add_answer_at_time(
-            Box::new(DnsSrv::new(
-                info.get_fullname(),
-                CLASS_IN | CLASS_UNIQUE,
-                info.get_host_ttl(),
-                info.get_priority(),
-                info.get_weight(),
-                info.get_port(),
-                info.get_hostname().to_string(),
-            )),
-            0,
-        );
-        
+        // change SRV answer from at_time to additional
         out.add_additional_answer(
             Box::new(DnsSrv::new(
                 info.get_fullname(),
@@ -1247,7 +1226,7 @@ impl Zeroconf {
                 info.get_weight(),
                 info.get_port(),
                 info.get_hostname().to_string(),
-            ))
+            )),
         );
         out.add_answer_at_time(
             Box::new(DnsTxt::new(
@@ -1270,20 +1249,11 @@ impl Zeroconf {
                 IpAddr::V4(_) => TYPE_A,
                 IpAddr::V6(_) => TYPE_AAAA,
             };
-            out.add_answer_at_time(
-                Box::new(DnsAddress::new(
-                    info.get_hostname(),
-                    t,
-                    CLASS_IN | CLASS_UNIQUE,
-                    info.get_host_ttl(),
-                    addr,
-                )),
-                0,
-            );
+            // change answer to be additional instead of at_time
             out.add_additional_answer(
                 Box::new(DnsAddress::new(
                     info.get_hostname(),
-                    TYPE_A,
+                    t,
                     CLASS_IN | CLASS_UNIQUE,
                     info.get_host_ttl(),
                     addr,
