@@ -1668,6 +1668,10 @@ impl Zeroconf {
 
             if qtype == TYPE_PTR {
                 for service in self.my_services.values() {
+                    // hack for vrchat duplicating our service, idk
+                    if service.time_since_creation() <= Duration::from_secs(1) {
+                        continue;
+                    }
                     if question.entry.name == service.get_type()
                         || service
                             .get_subtype()

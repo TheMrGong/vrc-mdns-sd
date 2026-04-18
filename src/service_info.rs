@@ -7,7 +7,7 @@ use std::{
     convert::TryInto,
     fmt,
     net::{IpAddr, Ipv4Addr},
-    str::FromStr,
+    str::FromStr, time::{Duration, Instant},
 };
 
 /// Default TTL values in seconds
@@ -36,6 +36,7 @@ pub struct ServiceInfo {
     weight: u16,
     txt_properties: TxtProperties,
     addr_auto: bool, // Let the system update addresses automatically.
+    creation_time: Instant,
 }
 
 impl ServiceInfo {
@@ -119,9 +120,14 @@ impl ServiceInfo {
             weight: 0,
             txt_properties,
             addr_auto: false,
+            creation_time: Instant::now(),
         };
 
         Ok(this)
+    }
+
+    pub fn time_since_creation(&self) -> Duration {
+        self.creation_time.elapsed()
     }
 
     /// Indicates that the library should automatically
